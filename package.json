@@ -1,0 +1,23 @@
+{
+  "name": "linetime",
+  "version": "1.0.0",
+  "description": "A timeline editor for collections and texts divided into chapters",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:web": "node scripts/build-web.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "npm run test:rust && npm run test:e2e",
+    "test:rust": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "test:e2e": "playwright test",
+    "smoke": "node scripts/smoke.mjs",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@tauri-apps/cli": "^2.12.4"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "format": "linetime",
+  "version": 1,
+  "title": "Test collection",
+  "subtitle": "Fixture for automated tests",
+  "author": "",
+  "types": [
+    { "id": "chapter", "name": "Chapter", "shape": "ring", "color": "c2", "emph": false },
+    { "id": "interlude", "name": "Interlude", "shape": "disc", "color": "c1", "emph": true },
+    { "id": "epilogue", "name": "Epilogue", "shape": "diamond", "color": "c3", "emph": false }
+  ],
+  "latex": { "pieceAs": "chapter", "engine": "lualatex", "preamble": "", "skipIdeas": true },
+  "order": ["alpha.md", "beta.md", "gamma.md"]
+}

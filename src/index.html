@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>Linetime</title>
+<script src="js/theme-init.js"></script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <button id="brand" aria-haspopup="menu" aria-expanded="false" title="Switch project or change its settings"><span id="ptitle">Linetime</span><svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>
+    <span id="psub"></span>
+    <div id="pmenu" role="menu" hidden></div>
+  </div>
+  <button class="ribbon" id="b-bible" aria-pressed="false" title="Open the project’s story bible">Story bible</button>
+  <button class="ribbon" id="b-book" aria-pressed="false" title="Read the whole work as one formatted text">Preview</button>
+  <div class="spacer"></div>
+  <label class="search"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="m10.4 10.4 3.4 3.4" stroke="currentColor" stroke-width="1.3"/></svg><input id="q" type="search" placeholder="Find in all pieces" aria-label="Find in all pieces"></label>
+  <span class="sep" aria-hidden="true"></span>
+  <div class="seg" role="group" aria-label="Spacing">
+    <button id="sp-even" aria-pressed="true" title="Equal spacing between pieces">Even</button>
+    <button id="sp-len" aria-pressed="false" title="Spacing proportional to word count">By length</button>
+  </div>
+  <span class="sep" aria-hidden="true"></span>
+  <button class="icon" id="b-theme" title="Switch to light mode" aria-label="Switch to light mode"><svg class="sun" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 2v2.2M10 15.8V18M2 10h2.2M15.8 10H18M4.3 4.3l1.6 1.6M14.1 14.1l1.6 1.6M4.3 15.7l1.6-1.6M14.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.4"/></svg><svg class="moon" viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 12.6A6.2 6.2 0 0 1 7.4 4.5 6.2 6.2 0 1 0 15.5 12.6Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button>
+  <span class="sep" aria-hidden="true"></span>
+  <div class="actions">
+    <button class="btn ghost" id="b-add" aria-pressed="false" title="Choose where to add a piece on the timeline">Add piece</button>
+    <button class="btn ghost" id="b-import">Import .md</button>
+    <button class="btn ghost" id="b-export">Export</button>
+  </div>
+  <input type="file" id="file" accept=".md,.markdown,.txt,text/markdown,text/plain" multiple hidden>
+  <input type="file" id="dirfile" webkitdirectory multiple hidden>
+</header>
+
+<main>
+  <div id="track"><div id="inner"><div id="rule"></div></div></div>
+  <div class="legend" id="legend" aria-hidden="true"></div>
+  <div id="storeNote"></div>
+  <div id="insbar" hidden><span>Choose where to add the new piece: click a <b>+</b> on the timeline.</span><button class="btn ghost" data-act="cancelins">Cancel</button></div>
+</main>
+
+<aside id="side" aria-label="Piece editor">
+  <div class="sbar">
+    <input id="f-title" aria-label="Title">
+    <div class="tools">
+      <button class="icon" id="b-undo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5 3.5 9l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 9h7.5a4.5 4.5 0 0 1 0 9H9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="icon" id="b-redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12.5 5 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M16 9H8.5a4.5 4.5 0 0 0 0 9H11" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+      <button class="btn ghost" id="b-focus" title="Focus mode (Ctrl+Shift+F)">Focus</button>
+      <button class="btn primary" id="b-save" title="Save (Ctrl+S)">Save</button>
+      <button class="icon" id="b-close" title="Close (Esc)" aria-label="Close"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    </div>
+  </div>
+  <div class="sstate">
+    <span id="dirty">Saved</span>
+    <span id="wc"></span>
+    <span id="f-src"></span>
+    <div class="seg" role="group" aria-label="View">
+      <button id="m-edit" aria-pressed="true">Markdown</button>
+      <button id="m-prev" aria-pressed="false">Preview</button>
+    </div>
+    <button class="btn ghost" id="b-details" aria-expanded="false">Details</button>
+  </div>
+  <div id="details" hidden>
+    <label class="f">Type<select id="f-kind"></select></label>
+    <label class="f">Status
+      <select id="f-status"><option value="idea">Idea</option><option value="draft">Draft</option><option value="revision">Revision</option><option value="final">Final</option></select>
+    </label>
+    <label class="f wide">Summary (shown in the pop-up)<textarea class="in" id="f-summary" rows="3"></textarea></label>
+    <label class="f wide">Notes and open items<textarea class="in" id="f-notes" rows="3"></textarea></label>
+    <div class="drow">
+      <button class="btn ghost" id="b-left">Move earlier</button>
+      <button class="btn ghost" id="b-right">Move later</button>
+      <button class="btn ghost danger" id="b-del">Delete piece</button>
+    </div>
+    <div class="hint wide" id="f-file"></div>
+  </div>
+  <div class="body">
+    <textarea id="f-text" spellcheck="true" aria-label="Markdown text"></textarea>
+    <div id="preview" class="prose" hidden></div>
+  </div>
+</aside>
+<section id="book" aria-label="Preview of the whole work" hidden>
+  <nav id="book-toc"></nav>
+  <div id="book-main"></div>
+</section>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="js/desktop.js"></script>
+<script src="js/app.js"></script>
+<script src="js/smoke.js"></script>
+</body>
+</html>
