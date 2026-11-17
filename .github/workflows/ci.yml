@@ -1,0 +1,111 @@
+# Builds and tests Linetime on macOS, Linux and Windows for every push and
+# pull request. On macOS this runs the interface tests in WebKit (the engine
+# behind the macOS system webview), builds the .app and .dmg, and runs the
+# smoke test inside the built app.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci
+      - name: Rust unit tests
+        run: npm run test:rust
+      - name: Install Playwright browsers
+        run: npx playwright install webkit chromium
+      - name: Interface tests in WebKit and Chromium
+        run: npx playwright test
+      - name: Build Linetime.app and the disk image
+        run: npx tauri build --bundles app,dmg
+      - name: Smoke test inside the built app
+        run: npm run smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Linetime-macOS
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-macos
+          path: playwright-report/
+
+  linux:
+    name: Linux
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xvfb
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci
+      - name: Rust unit tests
+        run: npm run test:rust
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+      - name: Interface tests in Chromium and WebKit
+        run: npx playwright test
+      - name: Build the .deb package
+        run: npx tauri build --bundles deb
+      - name: Smoke test inside the built app
+        run: npm run smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Linetime-Linux
+          path: src-tauri/target/release/bundle/deb/*.deb
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - run: npm ci
+      - name: Rust unit tests
+        run: npm run test:rust
+      - name: Build the installer
+        run: npx tauri build --bundles nsis
+      - name: Smoke test inside the built app
+        run: npm run smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Linetime-Windows
+          path: src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
